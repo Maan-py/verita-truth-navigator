@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { authApi, ApiError } from "@/lib/api";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -17,10 +19,11 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Passwords don't match",
@@ -32,15 +35,31 @@ const Register = () => {
 
     setIsLoading(true);
 
-    // Simulate registration - in production, this would call your backend API
-    setTimeout(() => {
+    try {
+      const response = await authApi.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // Auto-login after registration
+      await login(formData.email, formData.password);
+
       toast({
         title: "Account created successfully",
-        description: "Welcome to Verita! You can now log in.",
+        description: `Welcome to Verita, ${response.data.user.name}!`,
       });
-      navigate("/login");
+      navigate("/dashboard");
+    } catch (error) {
+      const apiError = error as ApiError;
+      toast({
+        title: "Registration failed",
+        description: apiError.message || "Failed to create account. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,53 +83,25 @@ const Register = () => {
         <Card>
           <CardHeader>
             <CardTitle>Create an account</CardTitle>
-            <CardDescription>
-              Get started with Verita and access verified information
-            </CardDescription>
+            <CardDescription>Get started with Verita and access verified information</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
+                <Input id="name" type="text" placeholder="John Doe" value={formData.name} onChange={handleChange} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
+                <Input id="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleChange} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
+                <Input id="password" type="password" value={formData.password} onChange={handleChange} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                />
+                <Input id="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} required />
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">

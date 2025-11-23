@@ -1,0 +1,620 @@
+{
+	"info": {
+		"_postman_id": "verita-api-collection",
+		"name": "Verita Truth Navigator API",
+		"description": "Complete API collection for Verita Truth Navigator MVP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.token) {",
+									"        pm.environment.set(\"auth_token\", jsonData.data.token);",
+									"        pm.environment.set(\"user_id\", jsonData.data.user.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "profile"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get All Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "dashboard", "categories"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Health Category Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/categories/health",
+							"host": ["{{base_url}}"],
+							"path": ["api", "dashboard", "categories", "health"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Politics Category Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/categories/politics",
+							"host": ["{{base_url}}"],
+							"path": ["api", "dashboard", "categories", "politics"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Finance Category Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/categories/finance",
+							"host": ["{{base_url}}"],
+							"path": ["api", "dashboard", "categories", "finance"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Environment Category Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/categories/environment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "dashboard", "categories", "environment"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Education Category Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/categories/education",
+							"host": ["{{base_url}}"],
+							"path": ["api", "dashboard", "categories", "education"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create/Update Dashboard Item (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"label\": \"Vaccination Rate\",\n  \"value\": \"87%\",\n  \"trend\": \"+5%\",\n  \"source_url\": \"https://example.com/source\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/categories/health/items",
+							"host": ["{{base_url}}"],
+							"path": ["api", "dashboard", "categories", "health", "items"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Create Report",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.environment.set(\"report_id\", jsonData.data.id);",
+									"        console.log(\"Auto-set report_id to:\", jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"This is a suspicious claim that needs verification. Please check if this is true or false.\",\n  \"image_url\": \"https://example.com/image.jpg\",\n  \"category\": \"health\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reports",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reports"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Reports",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.length > 0) {",
+									"        // Auto-set first report ID for testing",
+									"        pm.environment.set(\"report_id\", jsonData.data[0].id);",
+									"        console.log(\"Auto-set report_id to:\", jsonData.data[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reports",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reports"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Report by ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Check if report_id is set",
+									"var reportId = pm.environment.get(\"report_id\");",
+									"if (!reportId || reportId === \"\") {",
+									"    console.warn(\"⚠️  report_id is not set. Please run 'Create Report' or 'Get User Reports' first.\");",
+									"    console.warn(\"You can also set it manually in environment variables.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reports/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reports", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{report_id}}",
+									"description": "Report ID from 'Create Report' or 'Get User Reports' response"
+								}
+							]
+						},
+						"description": "Get a specific report by ID. Make sure to run 'Create Report' or 'Get User Reports' first to auto-set report_id."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Get All Reports",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.length > 0) {",
+									"        // Auto-set first report ID for testing",
+									"        pm.environment.set(\"report_id\", jsonData.data[0].id);",
+									"        console.log(\"Auto-set report_id to:\", jsonData.data[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/reports?status=PENDING&page=1&limit=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "reports"],
+							"query": [
+								{
+									"key": "status",
+									"value": "PENDING",
+									"description": "Filter by status: PENDING, FACT, HOAX, UNVERIFIED"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Report Status",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Check if report_id is set",
+									"var reportId = pm.environment.get(\"report_id\");",
+									"if (!reportId || reportId === \"\") {",
+									"    console.warn(\"⚠️  report_id is not set. Please run 'Get All Reports' or 'Create Report' first.\");",
+									"    console.warn(\"You can also set it manually in environment variables.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"FACT\",\n  \"verification_notes\": \"Verified against official government sources. This information is accurate.\",\n  \"category\": \"health\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/reports/:id/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "reports", ":id", "status"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{report_id}}",
+									"description": "Report ID from 'Get All Reports' or 'Create Report' response"
+								}
+							]
+						},
+						"description": "Update report verification status. Make sure to run 'Get All Reports' or 'Create Report' first to auto-set report_id."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Report Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/reports/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "reports", "stats"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Education",
+			"item": [
+				{
+					"name": "Get All Modules",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.length > 0) {",
+									"        // Auto-set first module ID for testing",
+									"        pm.environment.set(\"module_id\", jsonData.data[0].id);",
+									"        console.log(\"Auto-set module_id to:\", jsonData.data[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/education/modules",
+							"host": ["{{base_url}}"],
+							"path": ["api", "education", "modules"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Module by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/education/modules/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "education", "modules", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{module_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Progress",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/education/progress",
+							"host": ["{{base_url}}"],
+							"path": ["api", "education", "progress"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Module Progress",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Check if module_id is set",
+									"var moduleId = pm.environment.get(\"module_id\");",
+									"if (!moduleId || moduleId === \"\") {",
+									"    console.warn(\"⚠️  module_id is not set. Please run 'Get All Modules' first or set module_id manually.\");",
+									"    console.warn(\"You can also set it manually in environment variables.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"progress_percentage\": 75,\n  \"completed\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/education/modules/:moduleId/progress",
+							"host": ["{{base_url}}"],
+							"path": ["api", "education", "modules", ":moduleId", "progress"],
+							"variable": [
+								{
+									"key": "moduleId",
+									"value": "{{module_id}}",
+									"description": "Module ID from 'Get All Modules' response"
+								}
+							]
+						},
+						"description": "Update progress for a specific module. Make sure to run 'Get All Modules' first to auto-set module_id, or set it manually in environment variables."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Achievements",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/education/achievements",
+							"host": ["{{base_url}}"],
+							"path": ["api", "education", "achievements"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}
+

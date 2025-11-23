@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { ApiError } from "@/lib/api";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,20 +15,30 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login - in production, this would call your backend API
-    setTimeout(() => {
+    try {
+      await login(email, password);
+      
       toast({
         title: "Login successful",
-        description: "Welcome back to Verita!",
+        description: "Welcome back!",
       });
       navigate("/dashboard");
+    } catch (error) {
+      const apiError = error as ApiError;
+      toast({
+        title: "Login failed",
+        description: apiError.message || "Invalid email or password",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

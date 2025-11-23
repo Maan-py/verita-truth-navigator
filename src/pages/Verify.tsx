@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,14 +8,68 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle2, Clock, Upload, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, Upload, XCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { reportsApi, ApiError, api } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
 const Verify = () => {
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Check if user is authenticated
+  const token = api.getToken();
+  const isAuthenticated = !!token;
+
+  // Fetch user reports
+  const { data: reportsData, isLoading: reportsLoading } = useQuery({
+    queryKey: ["user-reports"],
+    queryFn: () => reportsApi.getUserReports(),
+    enabled: isAuthenticated,
+    onError: (error: ApiError) => {
+      if (error.statusCode !== 401) {
+        toast({
+          title: "Error loading reports",
+          description: error.message || "Failed to load your reports",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  // Submit report mutation
+  const submitMutation = useMutation({
+    mutationFn: (data: { content: string; image_url?: string; category?: string }) =>
+      reportsApi.createReport(data),
+    onSuccess: () => {
+      toast({
+        title: "Submission received",
+        description: "Our team will verify this content within 24 hours. You'll receive an email notification.",
+      });
+      setContent("");
+      setImage(null);
+      queryClient.invalidateQueries({ queryKey: ["user-reports"] });
+    },
+    onError: (error: ApiError) => {
+      if (error.statusCode === 401) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to submit a report",
+          variant: "destructive",
+        });
+        navigate("/login");
+      } else {
+        toast({
+          title: "Submission failed",
+          description: error.message || "Failed to submit report. Please try again.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,18 +83,21 @@ const Verify = () => {
       return;
     }
 
-    setIsSubmitting(true);
-
-    // Simulate submission
-    setTimeout(() => {
+    if (!isAuthenticated) {
       toast({
-        title: "Submission received",
-        description: "Our team will verify this content within 24 hours. You'll receive an email notification.",
+        title: "Authentication required",
+        description: "Please log in to submit a report",
+        variant: "destructive",
       });
-      setContent("");
-      setImage(null);
-      setIsSubmitting(false);
-    }, 1000);
+      navigate("/login");
+      return;
+    }
+
+    // For MVP, we'll skip image upload (can be added later with Supabase Storage)
+    submitMutation.mutate({
+      content: content.trim(),
+      // image_url: imageUrl, // TODO: Implement image upload
+    });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,8 +194,15 @@ const Verify = () => {
                       </p>
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? "Submitting..." : "Submit for Verification"}
+                    <Button type="submit" className="w-full" disabled={submitMutation.isPending}>
+                      {submitMutation.isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit for Verification"
+                      )}
                     </Button>
                   </form>
                 </CardContent>
@@ -149,33 +214,54 @@ const Verify = () => {
                   <CardDescription>Track the status of your verification requests</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { id: 1, snippet: "COVID-19 vaccine contains microchips...", status: "HOAX", date: "2 days ago" },
-                      { id: 2, snippet: "Government announces new economic policy...", status: "FACT", date: "5 days ago" },
-                      { id: 3, snippet: "New environmental regulations...", status: "PENDING", date: "1 hour ago" },
-                    ].map((submission) => (
-                      <div key={submission.id} className="flex items-start justify-between p-4 border border-border rounded-lg">
-                        <div className="flex-1">
-                          <p className="font-medium mb-1 line-clamp-1">{submission.snippet}</p>
-                          <p className="text-sm text-muted-foreground">{submission.date}</p>
-                        </div>
-                        <Badge 
-                          variant={
-                            submission.status === "FACT" ? "default" : 
-                            submission.status === "HOAX" ? "destructive" : 
-                            "secondary"
-                          }
-                        >
-                          {submission.status === "PENDING" ? (
-                            <><Clock className="h-3 w-3 mr-1" /> Pending</>
-                          ) : (
-                            submission.status
-                          )}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
+                  {!isAuthenticated ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>Please log in to view your submissions</p>
+                      <Button variant="outline" className="mt-4" onClick={() => navigate("/login")}>
+                        Log In
+                      </Button>
+                    </div>
+                  ) : reportsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                  ) : reportsData?.data && reportsData.data.length > 0 ? (
+                    <div className="space-y-4">
+                      {reportsData.data.map((report) => {
+                        const date = new Date(report.created_at);
+                        const timeAgo = getTimeAgo(date);
+                        const snippet = report.content.length > 60 
+                          ? report.content.substring(0, 60) + "..." 
+                          : report.content;
+
+                        return (
+                          <div key={report.id} className="flex items-start justify-between p-4 border border-border rounded-lg">
+                            <div className="flex-1">
+                              <p className="font-medium mb-1 line-clamp-1">{snippet}</p>
+                              <p className="text-sm text-muted-foreground">{timeAgo}</p>
+                            </div>
+                            <Badge 
+                              variant={
+                                report.status === "FACT" ? "default" : 
+                                report.status === "HOAX" ? "destructive" : 
+                                "secondary"
+                              }
+                            >
+                              {report.status === "PENDING" ? (
+                                <><Clock className="h-3 w-3 mr-1" /> Pending</>
+                              ) : (
+                                report.status
+                              )}
+                            </Badge>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>No submissions yet. Submit your first report above!</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -250,5 +336,18 @@ const Verify = () => {
     </div>
   );
 };
+
+// Helper function to get time ago
+function getTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "Just now";
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  
+  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 export default Verify;
