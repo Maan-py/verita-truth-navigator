@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { createError } from '../middleware/errorHandler.js';
 import { AuthRequest } from '../middleware/auth.middleware.js';

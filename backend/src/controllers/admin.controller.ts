@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { createError } from '../middleware/errorHandler.js';
 import { AuthRequest } from '../middleware/auth.middleware.js';
@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase.js';
 // Middleware to check if user is admin
 export const checkAdmin = async (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {
@@ -144,7 +144,7 @@ export const updateReportStatus = async (
 
 // Get report statistics (admin only)
 export const getReportStats = async (
-  req: AuthRequest,
+  _req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {

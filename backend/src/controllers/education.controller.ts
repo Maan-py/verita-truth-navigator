@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase.js';
 
 // Get all education modules
 export const getModules = async (
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction
 ) => {

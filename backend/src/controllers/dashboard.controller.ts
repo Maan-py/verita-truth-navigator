@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase.js';
 
 // Get all dashboard categories
 export const getCategories = async (
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction
 ) => {
