@@ -10,25 +10,18 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle2, Clock, Upload, XCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { reportsApi, ApiError, api } from "@/lib/api";
-import { useNavigate } from "react-router-dom";
+import { reportsApi, ApiError } from "@/lib/api";
 
 const Verify = () => {
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
-
-  // Check if user is authenticated
-  const token = api.getToken();
-  const isAuthenticated = !!token;
 
   // Fetch user reports
   const { data: reportsData, isLoading: reportsLoading } = useQuery({
     queryKey: ["user-reports"],
     queryFn: () => reportsApi.getUserReports(),
-    enabled: isAuthenticated,
     onError: (error: ApiError) => {
       if (error.statusCode !== 401) {
         toast({
@@ -54,20 +47,11 @@ const Verify = () => {
       queryClient.invalidateQueries({ queryKey: ["user-reports"] });
     },
     onError: (error: ApiError) => {
-      if (error.statusCode === 401) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to submit a report",
-          variant: "destructive",
-        });
-        navigate("/login");
-      } else {
-        toast({
-          title: "Submission failed",
-          description: error.message || "Failed to submit report. Please try again.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Submission failed",
+        description: error.message || "Failed to submit report. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -83,15 +67,6 @@ const Verify = () => {
       return;
     }
 
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to submit a report",
-        variant: "destructive",
-      });
-      navigate("/login");
-      return;
-    }
 
     // For MVP, we'll skip image upload (can be added later with Supabase Storage)
     submitMutation.mutate({
@@ -214,14 +189,7 @@ const Verify = () => {
                   <CardDescription>Track the status of your verification requests</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {!isAuthenticated ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>Please log in to view your submissions</p>
-                      <Button variant="outline" className="mt-4" onClick={() => navigate("/login")}>
-                        Log In
-                      </Button>
-                    </div>
-                  ) : reportsLoading ? (
+                  {reportsLoading ? (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="h-6 w-6 animate-spin" />
                     </div>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Award, BookOpen, Clock, Star, TrendingUp, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { educationApi, ApiError, api } from "@/lib/api";
+import { educationApi, ApiError } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 // Icon mapping
@@ -20,8 +20,6 @@ const iconMap: Record<string, any> = {
 
 const Learn = () => {
   const { toast } = useToast();
-  const token = api.getToken();
-  const isAuthenticated = !!token;
 
   // Fetch modules
   const { data: modulesData, isLoading: modulesLoading } = useQuery({
@@ -40,7 +38,6 @@ const Learn = () => {
   const { data: progressData } = useQuery({
     queryKey: ["education-progress"],
     queryFn: () => educationApi.getUserProgress(),
-    enabled: isAuthenticated,
     onError: (error: ApiError) => {
       // Silent fail for unauthenticated users
       if (error.statusCode !== 401) {
@@ -57,7 +54,6 @@ const Learn = () => {
   const { data: achievementsData } = useQuery({
     queryKey: ["education-achievements"],
     queryFn: () => educationApi.getUserAchievements(),
-    enabled: isAuthenticated,
     onError: (error: ApiError) => {
       // Silent fail for unauthenticated users
       if (error.statusCode !== 401) {
