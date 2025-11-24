@@ -44,7 +44,7 @@ import { adminApi, ApiError } from "@/lib/api";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const Admin = () => {
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [page, setPage] = useState(1);
   const [selectedReport, setSelectedReport] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -59,7 +59,7 @@ const Admin = () => {
   // Fetch reports
   const { data: reportsData, isLoading: reportsLoading, error: reportsError } = useQuery({
     queryKey: ["admin-reports", statusFilter, page],
-    queryFn: () => adminApi.getAllReports({ status: statusFilter || undefined, page, limit: 20 }),
+    queryFn: () => adminApi.getAllReports({ status: statusFilter === "ALL" ? undefined : statusFilter, page, limit: 20 }),
     retry: false,
     onError: (error: ApiError) => {
       if (error.statusCode === 403) {
@@ -113,7 +113,7 @@ const Admin = () => {
     setUpdateData({
       status: report.status,
       verification_notes: report.verification_notes || "",
-      category: report.category || "",
+      category: report.category || "NONE",
     });
     setIsDialogOpen(true);
   };
@@ -123,7 +123,7 @@ const Admin = () => {
     updateMutation.mutate({
       status: updateData.status,
       verification_notes: updateData.verification_notes || undefined,
-      category: updateData.category || undefined,
+      category: updateData.category === "NONE" ? undefined : updateData.category,
     });
   };
 
@@ -233,7 +233,7 @@ const Admin = () => {
                       <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Status</SelectItem>
+                      <SelectItem value="ALL">All Status</SelectItem>
                       <SelectItem value="PENDING">Pending</SelectItem>
                       <SelectItem value="FACT">Fact</SelectItem>
                       <SelectItem value="HOAX">Hoax</SelectItem>
@@ -429,7 +429,7 @@ const Admin = () => {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="NONE">None</SelectItem>
                       <SelectItem value="health">Health</SelectItem>
                       <SelectItem value="politics">Politics</SelectItem>
                       <SelectItem value="finance">Finance</SelectItem>

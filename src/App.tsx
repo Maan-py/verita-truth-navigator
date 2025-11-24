@@ -14,6 +14,7 @@ import About from "./pages/About";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -56,9 +57,11 @@ const App = () => (
             <Route
               path="/admin"
               element={
-                <ProtectedRoute requireAdmin>
-                  <Admin />
-                </ProtectedRoute>
+                <ErrorBoundary>
+                  <ProtectedRoute requireAdmin>
+                    <Admin />
+                  </ProtectedRoute>
+                </ErrorBoundary>
               }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
