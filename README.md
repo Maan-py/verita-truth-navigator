@@ -1,76 +1,39 @@
-# Welcome to your Lovable project
+# Verita Truth Navigator 🛡️
 
-## Project info
+Verita Truth Navigator is a comprehensive digital literacy platform designed to combat misinformation. It empowers users to verify news, report hoaxes, and access educational modules to improve their critical thinking skills.
 
-**URL**: https://lovable.dev/projects/71d38d0f-b794-4617-99f6-1b43102ff58d
+## ✨ Key Features
 
-## How can I edit this code?
+- **🔍 Hoax Verification**: Submit content to be verified by our system and community.
+- **📊 Data Dashboard**: Visualize trends in misinformation across various categories (Health, Politics, Finance, etc.).
+- **📝 Reporting System**: Report suspicious content and track the status of your reports.
+- **🎓 Education Modules**: Interactive literacy modules to enhance your digital media skills.
+- **👑 Admin Dashboard**: Dedicated portal for administrators to manage reports and verify content.
 
-There are several ways of editing your application.
+## 🛠️ Tech Stack
 
-**Use Lovable**
+### Frontend
+- **Framework**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **State Management**: [TanStack Query](https://tanstack.com/query/latest)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/71d38d0f-b794-4617-99f6-1b43102ff58d) and start prompting.
+### Backend
+- **Runtime**: [Node.js](https://nodejs.org/)
+- **Framework**: [Express.js](https://expressjs.com/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Database**: [Supabase](https://supabase.com/) (PostgreSQL)
+- **Authentication**: JWT & Supabase Auth
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📁 Project Structure
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-**Frontend:**
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-**Backend:**
-- Express.js
-- TypeScript
-- JWT Authentication
-- Zod Validation
-
-## 📁 Project Structure (Monorepo)
+This project is a monorepo containing both the frontend and backend:
 
 ```
 verita-truth-navigator/
-├── src/              # Frontend (React + Vite)
-├── backend/          # Backend API (Express + TypeScript)
+├── src/              # Frontend Application (React)
+├── backend/          # Backend API (Express)
 │   ├── src/
 │   │   ├── controllers/
 │   │   ├── middleware/
@@ -80,60 +43,64 @@ verita-truth-navigator/
 └── package.json      # Frontend dependencies
 ```
 
-## 🚀 Development Setup
+## 🚀 Getting Started
 
-### Frontend
+### Prerequisites
+- Node.js (v18+ recommended)
+- npm or bun
 
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd verita-truth-navigator
+   ```
+
+2. **Setup Backend**
+   ```bash
+   cd backend
+   npm install
+   cp .env.example .env  # Configure your environment variables
+   ```
+
+3. **Setup Frontend**
+   ```bash
+   cd ..  # Return to root
+   npm install
+   ```
+
+### Running the Application
+
+To run the full stack locally, you need two terminal windows:
+
+**Terminal 1 (Frontend):**
 ```bash
-# Install dependencies
-npm install
-
-# Start development server (runs on http://localhost:8080)
 npm run dev
 ```
+Runs on `http://localhost:8080`
 
-### Backend
-
+**Terminal 2 (Backend):**
 ```bash
-# Navigate to backend folder
 cd backend
-
-# Install dependencies
-npm install
-
-# Copy environment variables
-cp .env.example .env
-# Edit .env and set your JWT_SECRET
-
-# Start development server (runs on http://localhost:3000)
 npm run dev
 ```
-
-### Running Both
-
-Buka 2 terminal:
-- Terminal 1: `npm run dev` (frontend)
-- Terminal 2: `cd backend && npm run dev` (backend)
+Runs on `http://localhost:3000`
 
 ## 🚢 Deployment
 
-**Tidak perlu repo terpisah!** Frontend dan backend bisa di-deploy terpisah dari satu repo ini.
+### Frontend
+Deploy the root directory to Vercel or Netlify.
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
 
-Lihat [DEPLOYMENT.md](./DEPLOYMENT.md) untuk panduan lengkap deployment.
-
-**Quick Deploy:**
-- **Frontend** → Vercel/Netlify (deploy dari root, build command: `npm run build`)
-- **Backend** → Railway/Render (deploy dari `backend/` folder)
+### Backend
+Deploy the `backend/` directory to Railway, Render, or Heroku.
+- **Build Command**: `npm run build`
+- **Start Command**: `npm start`
 
 ## 📚 Documentation
 
-- [Backend API Documentation](./backend/README.md)
+- [Backend API Documentation](./backend/API_DOCUMENTATION.md)
 - [Deployment Guide](./DEPLOYMENT.md)
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- [MVP Implementation Status](./MVP_IMPLEMENTATION.md)
